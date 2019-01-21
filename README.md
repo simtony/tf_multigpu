@@ -1,7 +1,7 @@
 # Introduction
 This repo contains several muti-gpu/distributed training implementation in Tensorflow.
 
-It serve as benchmarking as well as a good starter training script:
+It serve as a good starter training script:
 
 * allreduce_local_sync.py: synchronized update with allreduce. Recommended.
 * ps_local_sync.py: synchronized update with parameter server. This is recommended by Tensorflow documentation, though it is the least efficient.
@@ -9,7 +9,7 @@ It serve as benchmarking as well as a good starter training script:
 
 There is a complementary article though written in Chinese: https://zhuanlan.zhihu.com/p/50116885
 
-# How to use
+# Usage
 The code does not consumes any data: it generates fake data and fits them.
 
 Simply run
@@ -17,15 +17,11 @@ Simply run
 python allreduce_local_sync.py
 python ps_local_sync.py
 ```
-For `ps_distribute.py`, run the following commands in order:
+For `ps_distribute.py`, make sure you have 2 GPU, and run the following commands in order:
 ```
 python async.py --job ps --index 0
 python async.py --job woker --index 0
 python async.py --job woker --index 1
 ```
 
-
-For benchmarking, especially for different communication/computation ratio, simply modify the fake model.
-
-
-
+For benchmarking, especially for different communication/computation ratio, simply modify the model code.
