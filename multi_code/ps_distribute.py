@@ -33,18 +33,19 @@ def build_tower(batch):
 def main():
     usage = """
     First start ps: 
-    $ python async.py --job ps --index 0
+    $ python ps_distribute.py --job ps --index 0
     
     Then start the workers: 
-    $ python async.py --job woker --index 0
-    $ python async.py --job woker --index 1
+    $ python ps_distribute.py --job worker --index 0 --gpu 0 --max_step 10000
+    $ python ps_distribute.py --job worker --index 1 --gpu 1 --max_step 10000
     """
 
     parser = argparse.ArgumentParser(usage=usage)
     parser.add_argument('--job', choices=['worker', 'ps'])
     parser.add_argument('--index', type=int)
+    parser.add_argument('--gpu', type=int)
     parser.add_argument('--sync', action="store_true", help="Turn on synchronized gradient mode")
-    parser.add_argument('--max_step', default=100, type=int)
+    parser.add_argument('--max_step', default=10000, type=int)
 
     # one ps, two worker
     ps = ["127.0.0.1:60000"]
@@ -68,7 +69,7 @@ def main():
     elif args.job == "worker":
         # worker on gpu
         # gpu index by worker index
-        os.environ["CUDA_VISIBLE_DEVICES"] = '%d' % args.index
+        os.environ["CUDA_VISIBLE_DEVICES"] = '%d' % args.gpu
         server = tf.train.Server(cluster,
                                  job_name=args.job,
                                  task_index=args.index)

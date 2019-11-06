@@ -20,7 +20,7 @@ def split_batches(num_splits, batches):
         batch_frags = tf.split(batch, frag_sizes, axis=0)
         batch_frags_list.append(batch_frags)
 
-    frag_batches_list = zip(*batch_frags_list)
+    frag_batches_list = list(zip(*batch_frags_list))
     # fix corner case
     for i, frag_batches in enumerate(frag_batches_list):
         if len(frag_batches) == 1:
@@ -35,7 +35,7 @@ def build_dataset(num_gpus):
     dataset = tf.data.Dataset.from_tensor_slices((rand, rand_labels))
     dataset = dataset.repeat()
     dataset = dataset.batch(100)
-    dataset = dataset.map(lambda batch: split_batches(num_splits=num_gpus, batches=[batch]))
+    dataset = dataset.map(lambda rand, rand_labels: split_batches(num_splits=num_gpus, batches=[rand, rand_labels]))
     return dataset
 
 
@@ -55,10 +55,11 @@ def build_tower(batch):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--num_gpus', default=2, type=int)
-    parser.add_argument('--max_step', default=1000, type=int)
+    parser.add_argument('--gpus', default='0,1', type=str)
+    parser.add_argument('--max_step', default=10000, type=int)
     args = parser.parse_args()
-    os.environ["CUDA_VISIBLE_DEVICES"] = ','.join([str(i) for i in range(args.num_gpus)])
+    args.num_gpus = len(args.gpus.split(","))
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpus
 
     dataset = build_dataset(args.num_gpus)
     iterator = dataset.make_initializable_iterator()
